@@ -5,24 +5,28 @@ using UnityEngine.UI;
 
 public class Dispatcher : MonoBehaviour
 {
-    static Dictionary<string, int> shipsLeftToAllocate = new Dictionary<string, int>();
-    static Dictionary<string, Text> LablesDict = new Dictionary<string, Text>();
-    string DictKey;
     public GameObject shipPrefab;
     public static Ship currentShip;
-    bool IsWorkingInstance=true;
+
+    string dictKey;
+    bool isWorkingInstance = true;
+
+    static Dictionary<string, int> shipsLeftToAllocate = new Dictionary<string, int>();
+    static Dictionary<string, Text> lablesDict = new Dictionary<string, Text>();
+    static List<Dispatcher> allShips = new List<Dispatcher>();
 
     // Start is called before the first frame update
     protected virtual void Start()
     {
-        IsWorkingInstance = name.Contains("(Clone)");
-        DictKey = name.Replace("(Clone)", null);
-        //Debug.Log(DictKey);
-        var floorsNumStr = DictKey.Replace("Ship-", null);
+        isWorkingInstance = name.Contains("(Clone)");
+        dictKey = name.Replace("(Clone)", null);
+        allShips.Add(this);
+
+        var floorsNumStr = dictKey.Replace("Ship-", null);
         var shipsToAllocate = 5 - int.Parse(floorsNumStr);
-        if (!shipsLeftToAllocate.ContainsKey(DictKey))
+        if (!shipsLeftToAllocate.ContainsKey(dictKey))
         {
-            shipsLeftToAllocate.Add(DictKey, shipsToAllocate);
+            shipsLeftToAllocate.Add(dictKey, shipsToAllocate);
             FillLabelsDict();
         }
         ReFreshLabel();
@@ -30,7 +34,7 @@ public class Dispatcher : MonoBehaviour
 
     protected void OnShipClick()
     {   
-        if (IsWorkingInstance)
+        if (isWorkingInstance)
         {
             if (currentShip == null)
             {
@@ -40,13 +44,13 @@ public class Dispatcher : MonoBehaviour
             {
                 if (!currentShip.WAsLocatedOnse())
                 {
-                    shipsLeftToAllocate[DictKey]--;
+                    shipsLeftToAllocate[dictKey]--;
                     ReFreshLabel();
                 }
                 currentShip = null;
             }
         }
-        else if (currentShip == null&&shipsLeftToAllocate[DictKey]>0) // Обычный шаблон
+        else if (currentShip == null&&shipsLeftToAllocate[dictKey]>0) // Обычный шаблон
         {
             var shipObjToPlay = Instantiate(shipPrefab, transform.parent.transform);
             currentShip = shipObjToPlay.GetComponentInChildren<Ship>();
@@ -54,9 +58,9 @@ public class Dispatcher : MonoBehaviour
     }
     void FillLabelsDict()
     {
-        var LabelObj = GameObject.Find(DictKey+"(Label)");
+        var LabelObj = GameObject.Find(dictKey+"(Label)");
         var Label = LabelObj.GetComponent<Text>();
-        LablesDict.Add(DictKey, Label);
+        lablesDict.Add(dictKey, Label);
         /*var Labels = transform.parent.GetComponentsInChildren<Text>();
         foreach (var Label in Labels)
         {
@@ -69,6 +73,6 @@ public class Dispatcher : MonoBehaviour
     }
     void ReFreshLabel()
     {
-        LablesDict[DictKey].text = shipsLeftToAllocate[DictKey]+"x";
+        lablesDict[dictKey].text = shipsLeftToAllocate[dictKey]+"x";
     }
 }

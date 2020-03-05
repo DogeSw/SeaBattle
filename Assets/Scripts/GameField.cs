@@ -30,25 +30,31 @@ public class GameField : MonoBehaviour
 
         var sprRenderer = cellPrefab.GetComponent<SpriteRenderer>();
         cellSize = sprRenderer.bounds.size.x;
-        BoundsOfCells = new Bounds[Width(), High()];
+        BoundsOfCells = new Bounds[Width(), Height()];
         GenerateField();
     }
 
     void GenerateField()
     {
-        for (int i = 0; i < Width(); i++)
-        {
-            for (int j = 0; j < High(); j++)
-            {
-                var cellPos = new Vector2(originBottomLeft.x + i * cellSize,
-                    originBottomLeft.y + j * cellSize);
-                var cell = Instantiate(cellPrefab, cellPos, Quaternion.identity);
-                cell.transform.SetParent(origin.transform);
-                var CellBounds = new Bounds(cellPos, new Vector2(cellSize, cellSize));
-                BoundsOfCells[i, j] = CellBounds;
-            }
-        }
+        for (int x = 0; x < Width(); x++) GenerateFieldColumn(x);
     }
+
+    void GenerateFieldColumn(int x)
+    {
+        for (int y = 0; y < Height(); y++) OnGenerateCell(x, y);
+    }
+
+    void OnGenerateCell(int x, int y)
+    {
+        var cellPos = new Vector2(originBottomLeft.x + x * cellSize,
+            originBottomLeft.y + y * cellSize);
+        var cell = Instantiate(cellPrefab, cellPos, Quaternion.identity);
+        cell.transform.SetParent(origin.transform);
+        var CellBounds = new Bounds(cellPos, new Vector2(cellSize, cellSize));
+        BoundsOfCells[x, y] = CellBounds;
+    }
+
+
     void Update()
     {
         origin.transform.position = originBottomLeft;
@@ -59,7 +65,7 @@ public class GameField : MonoBehaviour
         return fieldBody.GetLength(0);
     }
 
-    static int High()
+    static int Height()
     {
         return fieldBody.GetLength(1);
     }
@@ -91,7 +97,7 @@ public class GameField : MonoBehaviour
         for (int i = 0; i < Width(); i++)
         {
             string str=" ";
-            for (int j = 0; j <  High(); j++)
+            for (int j = 0; j <  Height(); j++)
             {
                 str+=fieldBody[i, j]+" ";
             }
@@ -107,7 +113,7 @@ public class GameField : MonoBehaviour
     {
         var CellNormalPos = GetCellNormalPos(mousePos);
         var BottomLeftCells = BoundsOfCells[0, 0];
-        var UpperRightCells = BoundsOfCells[Width() - 1, High() - 1];
+        var UpperRightCells = BoundsOfCells[Width() - 1, Height() - 1];
         bottomLeftCellStartCorner = BottomLeftCells.min;
         var UpperRightCorner = UpperRightCells.max;
         bool IsOverField = mousePos.x>bottomLeftCellStartCorner.x && mousePos.y>bottomLeftCellStartCorner.y && mousePos.x<UpperRightCorner.x && mousePos.y<UpperRightCorner.y;
@@ -148,6 +154,6 @@ public class GameField : MonoBehaviour
     }
     static bool IsPointWithinMatrics(int x, int y)
     {
-        return x>=0&&y>=0&& x < Width() && y <High();
+        return x>=0&&y>=0&& x < Width() && y <Height();
     }
 }
