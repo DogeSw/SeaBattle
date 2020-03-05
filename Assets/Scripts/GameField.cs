@@ -60,12 +60,12 @@ public class GameField : MonoBehaviour
         origin.transform.position = originBottomLeft;
     }
 
-    static int Width()
+    protected static int Width()
     {
         return fieldBody.GetLength(0);
     }
 
-    static int Height()
+    protected static int Height()
     {
         return fieldBody.GetLength(1);
     }
