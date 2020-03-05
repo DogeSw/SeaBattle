@@ -14,13 +14,14 @@ public class Dispatcher : MonoBehaviour
     static Dictionary<string, int> shipsLeftToAllocate = new Dictionary<string, int>();
     static Dictionary<string, Text> lablesDict = new Dictionary<string, Text>();
     static List<Dispatcher> allShips = new List<Dispatcher>();
+    static bool isAutoCreation = false;
 
     // Start is called before the first frame update
     protected virtual void Start()
     {
         isWorkingInstance = name.Contains("(Clone)");
         dictKey = name.Replace("(Clone)", null);
-        allShips.Add(this);
+        if (!isAutoCreation) allShips.Add(this);
 
         var floorsNumStr = dictKey.Replace("Ship-", null);
         var shipsToAllocate = 5 - int.Parse(floorsNumStr);
@@ -29,7 +30,7 @@ public class Dispatcher : MonoBehaviour
             shipsLeftToAllocate.Add(dictKey, shipsToAllocate);
             FillLabelsDict();
         }
-        ReFreshLabel();
+        RefreshLabel();
     }
 
     protected void OnShipClick()
@@ -45,7 +46,7 @@ public class Dispatcher : MonoBehaviour
                 if (!currentShip.WAsLocatedOnse())
                 {
                     shipsLeftToAllocate[dictKey]--;
-                    ReFreshLabel();
+                    RefreshLabel();
                 }
                 currentShip = null;
             }
@@ -71,8 +72,34 @@ public class Dispatcher : MonoBehaviour
             Debug.Log(Label);
         }*/
     }
-    void ReFreshLabel()
+    void RefreshLabel()
     {
         lablesDict[dictKey].text = shipsLeftToAllocate[dictKey]+"x";
+    }
+
+    static Dispatcher[] GetAllShipsOfType(bool templateOnes)
+    {
+        var result = new List<Dispatcher>();
+        foreach (var ship in allShips)
+            if (ship.isWorkingInstance ^ templateOnes) result.Add(ship);
+        return result.ToArray();
+    }
+
+    public static Dispatcher[] CreateAllShips()
+    {
+        isAutoCreation = true;
+        var templateShips = GetAllShipsOfType(true);
+        foreach (var tmplShip in templateShips) tmplShip.CreateAllClonesOfType();
+        return GetAllShipsOfType(false);
+    }
+
+    void CreateAllClonesOfType()
+    {
+        for (int i = 0; i < shipsLeftToAllocate[dictKey]; i++)
+        {
+            var ship = Instantiate(shipPrefab, transform.parent.transform);
+            allShips.Add(ship.GetComponent<Dispatcher>());
+        }
+        shipsLeftToAllocate[dictKey] = 0;
     }
 }
