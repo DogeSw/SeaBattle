@@ -17,7 +17,7 @@ public class Ship : Dispatcher
     int floorsNum;
     Animator[] animators;
     public bool IsWithIn = false;
-    public Vector2 CellCenterPos;
+    public Vector2 cellCenterPos;
     bool WasLocatedOnse = false;
     Vector2 LastPosition;
     Orientation LastOrentation;
@@ -72,7 +72,7 @@ public class Ship : Dispatcher
         GameField.CheckShipPosition(Daun, this);// Чекнуть корабельную позицию через Daun и это
         if (IsWithIn)
         {
-            transform.position =CellCenterPos;
+            transform.position =cellCenterPos;
         }
 
         if (Input.GetKeyUp(KeyCode.Space))

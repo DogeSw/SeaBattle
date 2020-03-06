@@ -12,8 +12,8 @@ public class GameField : MonoBehaviour
     
     public GameObject cellPrefab;
     public Vector2 originBottomLeft;
-    static Bounds[,] BoundsOfCells;
-    static float cellSize;
+    protected static Bounds[,] boundsOfCells;
+    protected static float cellSize;
     static Vector2 bottomLeftCellStartCorner;
 
     GameObject origin;
@@ -29,7 +29,7 @@ public class GameField : MonoBehaviour
 
         var sprRenderer = cellPrefab.GetComponent<SpriteRenderer>();
         cellSize = sprRenderer.bounds.size.x;
-        BoundsOfCells = new Bounds[Width(), Height()];
+        boundsOfCells = new Bounds[Width(), Height()];
         GenerateField();
     }
 
@@ -50,7 +50,7 @@ public class GameField : MonoBehaviour
         var cell = Instantiate(cellPrefab, cellPos, Quaternion.identity);
         cell.transform.SetParent(origin.transform);
         var CellBounds = new Bounds(cellPos, new Vector2(cellSize, cellSize));
-        BoundsOfCells[x, y] = CellBounds;
+        boundsOfCells[x, y] = CellBounds;
     }
 
 
@@ -78,7 +78,7 @@ public class GameField : MonoBehaviour
     }
     static void CellStateUnderneathShip(Ship ship,CellState cellState)
     {
-        Vector2 CellNormalPos = GetCellNormalPos(ship.CellCenterPos);
+        Vector2 CellNormalPos = GetCellNormalPos(ship.cellCenterPos);
         int x = (int)CellNormalPos.x;
         int y = (int)CellNormalPos.y;
         for (int i = 0; i < ship.FloorsNum(); i++)
@@ -106,8 +106,8 @@ public class GameField : MonoBehaviour
     public static void CheckShipPosition(Vector3 mousePos, Ship ship)
     {
         var CellNormalPos = GetCellNormalPos(mousePos);
-        var BottomLeftCells = BoundsOfCells[0, 0];
-        var UpperRightCells = BoundsOfCells[Width() - 1, Height() - 1];
+        var BottomLeftCells = boundsOfCells[0, 0];
+        var UpperRightCells = boundsOfCells[Width() - 1, Height() - 1];
         bottomLeftCellStartCorner = BottomLeftCells.min;
         var UpperRightCorner = UpperRightCells.max;
         bool IsOverField = mousePos.x>bottomLeftCellStartCorner.x && mousePos.y>bottomLeftCellStartCorner.y && mousePos.x<UpperRightCorner.x && mousePos.y<UpperRightCorner.y;
@@ -123,7 +123,7 @@ public class GameField : MonoBehaviour
         //Debug.Log(x+" , "+y);
         ship.IsPositionCorrect = IsLocationAppropriate(ship,sx,sy);
         ship.IsWithIn = true;
-        ship.CellCenterPos = BoundsOfCells[sx,sy].center;
+        ship.cellCenterPos = boundsOfCells[sx,sy].center;
         //Debug.Log(y);
 
     }
