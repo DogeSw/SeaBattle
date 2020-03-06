@@ -49,7 +49,7 @@ public class AutoAllocator : GameField
 
         for (int i = 0; i < 10; i++)
         {
-            CheckArea((Ship)allShips[i], spawnAreas[i]);
+            CheckAndAdjustArea((Ship)allShips[i], spawnAreas[i]);
         }
     }
 
@@ -76,21 +76,36 @@ public class AutoAllocator : GameField
         }
     }
 
-    bool CheckArea(Ship ship, Bounds area)
+    bool CheckAndAdjustArea(Ship ship, Bounds area)
     {
         var canStandVertically = ship.FloorsNum() <= area.size.y;
         var canStandHorizontally = ship.FloorsNum() <= area.size.x;
+        float adjSize = ship.FloorsNum() - 1;
 
         bool status = true;
 
-        if (!canStandHorizontally && !canStandVertically) status = false; //return false;
+        if (!canStandHorizontally && !canStandVertically) return false;
         else if (canStandHorizontally && canStandVertically)
             ship.orientation = (Ship.Orientation)Random.Range(0, 2);
         else if (canStandHorizontally) ship.orientation = Ship.Orientation.Horizontal;
         else ship.orientation = Ship.Orientation.Vertical;
+
+        Debug.Log($"initial area {FormatBounds(area)}");
+
+        if (ship.orientation == Ship.Orientation.Horizontal)
+        {
+            area.Expand(new Vector3(-adjSize, 0));
+            area.center = new Vector3(area.center.x - adjSize / 2, area.center.y);
+        }
+        else
+        {
+            area.Expand(new Vector3(0, -adjSize));
+            area.center = new Vector3(area.center.x, area.center.y + adjSize / 2);
+        }
+
         
-        Debug.Log($"area size {area.size} for ship len {ship.FloorsNum()} " +
-            $"is appropriate = {status} for orientation {ship.orientation}");
+        Debug.Log($"new area {FormatBounds(area)} for ship len {ship.FloorsNum()} " +
+            $"for orientation {ship.orientation}");
 
         return status;
     }
@@ -98,5 +113,10 @@ public class AutoAllocator : GameField
     List<T> CopyList<T>(List<T> list)
     {
         return new List<T>(list);
+    }
+
+    string FormatBounds(Bounds bounds)
+    {
+        return $"{bounds.min} {bounds.max}";
     }
 }
