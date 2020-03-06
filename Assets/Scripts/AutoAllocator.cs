@@ -19,16 +19,12 @@ public class AutoAllocator : GameField
         for (int i = 0; i < 10; i++)
         {
             var area = new Bounds(new Vector3(0, 0),
-                new Vector3(Random.Range(1, 7), Random.Range(1, 7)));
+                new Vector3(Random.Range(0, 4), Random.Range(0, 4)));
             spawnAreas.Add(area);
         }
+                
 
-        for (int i = 0; i < 10; i++)
-        {
-            CheckArea((Ship)allShips[i], spawnAreas[i]);
-        }
-
-        //StartCoroutine(AllocateAllShips());
+        StartCoroutine(AllocateAllShips());
     }
 
     void ClearGameField()
@@ -46,8 +42,14 @@ public class AutoAllocator : GameField
         while (!AreAllShipsInitialized()) yield return null;
 
         foreach (Ship ship in allShips)
+        {            
+            //AllocateShip(ship);
+        }
+
+
+        for (int i = 0; i < 10; i++)
         {
-            AllocateShip(ship);
+            CheckArea((Ship)allShips[i], spawnAreas[i]);
         }
     }
 
@@ -79,18 +81,16 @@ public class AutoAllocator : GameField
         var canStandVertically = ship.FloorsNum() <= area.size.y;
         var canStandHorizontally = ship.FloorsNum() <= area.size.x;
 
-        bool status = false;
+        bool status = true;
 
-        if (!canStandHorizontally && !canStandVertically) return status; //return false;
+        if (!canStandHorizontally && !canStandVertically) status = false; //return false;
         else if (canStandHorizontally && canStandVertically)
             ship.orientation = (Ship.Orientation)Random.Range(0, 2);
         else if (canStandHorizontally) ship.orientation = Ship.Orientation.Horizontal;
         else ship.orientation = Ship.Orientation.Vertical;
-
-        status = true;
-
+        
         Debug.Log($"area size {area.size} for ship len {ship.FloorsNum()} " +
-            $"is appropriate = {status}");
+            $"is appropriate = {status} for orientation {ship.orientation}");
 
         return status;
     }
