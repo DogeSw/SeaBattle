@@ -9,17 +9,16 @@ public class GameField : MonoBehaviour
     {
         Empty, Misdelivered, Occupied, Misplaced, Hit
     }
-
-
+    
     public GameObject cellPrefab;
     public Vector2 originBottomLeft;
     static Bounds[,] BoundsOfCells;
-    static int[,] fieldBody = new int[10, 10];
     static float cellSize;
     static Vector2 bottomLeftCellStartCorner;
 
     GameObject origin;
     protected string originObjName = "GameFieldOrigin";
+    protected static CellState[,] body = new CellState[10, 10];
 
 
     // Start is called before the first frame update
@@ -62,12 +61,12 @@ public class GameField : MonoBehaviour
 
     protected static int Width()
     {
-        return fieldBody.GetLength(0);
+        return body.GetLength(0);
     }
 
     protected static int Height()
     {
-        return fieldBody.GetLength(1);
+        return body.GetLength(1);
     }
     static Vector2 GetCellNormalPos(Vector2 Position)
     {
@@ -84,22 +83,17 @@ public class GameField : MonoBehaviour
         int y = (int)CellNormalPos.y;
         for (int i = 0; i < ship.FloorsNum(); i++)
         {
-            fieldBody[x, y] = (int)cellState;
-            if (ship.orientation == Ship.Orientation.Horizontal)
-            {
-                x++;
-            }
-            else if (ship.orientation == Ship.Orientation.Vertical)
-            {
-                y--;
-            }
+            body[x, y] = cellState;
+            if (ship.orientation == Ship.Orientation.Horizontal) x++;
+            else if (ship.orientation == Ship.Orientation.Vertical) y--;
         }
+
         for (int i = 0; i < Width(); i++)
         {
             string str=" ";
             for (int j = 0; j <  Height(); j++)
             {
-                str+=fieldBody[i, j]+" ";
+                str+=body[i, j]+" ";
             }
             Debug.Log(str);
         }
