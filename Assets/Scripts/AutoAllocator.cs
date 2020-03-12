@@ -16,13 +16,21 @@ public class AutoAllocator : GameField
         spawnAreas.Add(firstArea);
         ClearGameField();
 
-        //for (int i = 0; i < 10; i++)
-        //{
-        //    var area = new Bounds(new Vector3(0, 0),
-        //        new Vector3(Random.Range(0, 4), Random.Range(0, 4)));
-        //    spawnAreas.Add(area);
-        //}
-                
+        for (int i = 0; i < 20; i++)
+        {
+            var area = new Bounds(new Vector3(Random.Range(0,8), Random.Range(0,8)),
+                new Vector3(Random.Range(1, 4), Random.Range(1, 4)));
+            spawnAreas.Add(area);
+        }
+        for (int i = 0; i < 7; i++)
+        {
+            var a = spawnAreas[Random.Range(0, 10)];
+            var b = spawnAreas[Random.Range(0, 10)];
+            var overlap = BoundsOverlap(a, b);
+            Debug.Log($"bounds {FormatBounds(a)} and  {FormatBounds(b)} " + $"overlap {overlap}");
+
+        }
+
 
         StartCoroutine(AllocateAllShips());
     }
@@ -41,15 +49,15 @@ public class AutoAllocator : GameField
     {
         while (!AreAllShipsInitialized()) yield return null;
 
-        foreach (Ship ship in allShips)
-        {
-            int x = Random.Range(0, 7), y = Random.Range(0, 7);
-            var area = GetOccupitedArea(ship, x, y);
-            Debug.Log($"{FormatBounds(area)}, x={x}, y={y}, floors {ship.FloorsNum()}" + $"{ship.orientation}");
-            spawnAreas.Add(area);
+        //foreach (Ship ship in allShips)
+        //{
+        //    int x = Random.Range(0, 7), y = Random.Range(0, 7);
+        //    var area = GetOccupitedArea(ship, x, y);
+        //    Debug.Log($"{FormatBounds(area)}, x={x}, y={y}, floors {ship.FloorsNum()} " + $"{ship.orientation}");
+        //    spawnAreas.Add(area);
 
-            //AllocateShip(ship);
-        }
+        //    //AllocateShip(ship);
+        //}
 
 
         //for (int i = 0; i < 10; i++)
@@ -130,16 +138,33 @@ public class AutoAllocator : GameField
     void MarkupArea(Ship ship, int x, int y)
     {
         var occupitedArea = GetOccupitedArea(ship, x, y);
+        var initialSpawnAreas = CopyList(spawnAreas);
+
+        foreach (var initialSpawnArea in initialSpawnAreas)
+        {
+
+        }
 
 
     }
+
+    bool BoundsOverlap(Bounds initial, Bounds occupied)
+    {
+        if (initial == selectedArea) return true;
+        var miniMaxX = Mathf.Min(initial.max.x, occupied.max.x);
+        var maxMinX = Mathf.Min(initial.min.x, occupied.min.x);
+        var miniMaxY = Mathf.Min(initial.max.y, occupied.max.y);
+        var maxMinY = Mathf.Min(initial.min.y, occupied.min.y);
+        return miniMaxX > maxMinX && miniMaxY >  maxMinY;
+    }
+
 
 
     Bounds GetOccupitedArea(Ship ship, int x, int y)
     {
         float shipExtension = ship.FloorsNum() / 2;
         float centerX = x + shipExtension, centerY = y + 0.5f;
-        float areaWidth = shipExtension + 2, areaHeigth = 3;
+        float areaWidth = ship.FloorsNum() + 2, areaHeigth = 3;
 
         if (ship.orientation == Ship.Orientation.Vertical)
         {
@@ -156,7 +181,7 @@ public class AutoAllocator : GameField
 
     string FormatBounds(Bounds bounds)
     {
-        return $"{bounds.min} {bounds.max}";
+        return $"{bounds.min} {bounds.max - new Vector3(1, 1)}";
     }
 
     void OnDrawGizmos()
@@ -171,7 +196,7 @@ public class AutoAllocator : GameField
         {
             if (c == colors.Length) c = 0;
             Gizmos.color = colors[c];
-            Gizmos.DrawWireCube((Vector3)originBottomLeft + area.center, 
+            Gizmos.DrawWireCube((Vector3)originBottomLeft + area.center - new Vector3(2.5f, 2.5f) * cellSize, 
                 area.size * cellSize);
             c++;
         }
