@@ -9,18 +9,20 @@ public class Ship : Dispatcher
     {
         Horizontal, Vertical
     }
-    public bool IsPositionCorrect;
+    
     public Orientation orientation = Orientation.Horizontal;
     public GameObject floorButtonPref;
-    Canvas canvas;
-    bool toMove = false;
-    int floorsNum;
-    Animator[] animators;
-    public bool IsWithIn = false;
     public Vector2 cellCenterPos;
-    bool WasLocatedOnse = false;
+    public bool isWithinCell = false, isPositionCorrect;
+
+
     Vector2 LastPosition;
+    Canvas canvas;
     Orientation LastOrentation;
+    Animator[] animators;
+    bool toMove = false, WasLocatedOnse = false;
+    int floorsNum;
+    
 
 
     // Start is called before the first frame update
@@ -55,7 +57,7 @@ public class Ship : Dispatcher
     {
         foreach (var animator in animators)
         {
-            animator.SetBool("IsMistPlayst",!IsPositionCorrect);
+            animator.SetBool("IsMistPlayst",!isPositionCorrect);
         }
     }
 
@@ -70,7 +72,7 @@ public class Ship : Dispatcher
         Daun = canvas.transform.TransformPoint(Daun); // Выше написанное
         transform.position = Daun;// позиция мыши
         GameField.CheckShipPosition(Daun, this);// Чекнуть корабельную позицию через Daun и это
-        if (IsWithIn)
+        if (isWithinCell)
         {
             transform.position =cellCenterPos;
         }
@@ -121,14 +123,14 @@ public class Ship : Dispatcher
         {
             return;
         }
-        else if (toMove && IsPositionCorrect)
+        else if (toMove && isPositionCorrect)
         {
             LastPosition = transform.position;
             LastOrentation = orientation;
             GameField.RegisterShip(this);
         }
         OnShipClick();
-        if (IsPositionCorrect)
+        if (isPositionCorrect)
         {
             WasLocatedOnse = true;
         }

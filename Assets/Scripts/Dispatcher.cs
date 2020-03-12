@@ -41,7 +41,7 @@ public class Dispatcher : MonoBehaviour
             {
                 currentShip = GetComponentInChildren<Ship>();
             }
-            else if (currentShip.IsPositionCorrect)
+            else if (currentShip.isPositionCorrect)
             {
                 if (!currentShip.WAsLocatedOnse())
                 {

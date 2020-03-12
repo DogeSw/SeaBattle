@@ -16,22 +16,15 @@ public class AutoAllocator : GameField
         spawnAreas.Add(firstArea);
         ClearGameField();
 
-        for (int i = 0; i < 20; i++)
-        {
-            var area = new Bounds(new Vector3(Random.Range(0,8), Random.Range(0,8)),
-                new Vector3(Random.Range(1, 4), Random.Range(1, 4)));
-            spawnAreas.Add(area);
-        }
-        for (int i = 0; i < 7; i++)
-        {
-            var a = spawnAreas[Random.Range(0, 10)];
-            var b = spawnAreas[Random.Range(0, 10)];
-            var overlap = BoundsOverlap(a, b);
-            Debug.Log($"bounds {FormatBounds(a)} and  {FormatBounds(b)} " + $"overlap {overlap}");
-
-        }
+        
 
 
+        //for (int i = 0; i < 20; i++)
+        //{
+        //    var area = new Bounds(new Vector3(Random.Range(0,8), Random.Range(0,8)),
+        //        new Vector3(Random.Range(1, 4), Random.Range(1, 4)));
+        //    spawnAreas.Add(area);
+        //}
         StartCoroutine(AllocateAllShips());
     }
 
@@ -49,23 +42,11 @@ public class AutoAllocator : GameField
     {
         while (!AreAllShipsInitialized()) yield return null;
 
-        //foreach (Ship ship in allShips)
-        //{
-        //    int x = Random.Range(0, 7), y = Random.Range(0, 7);
-        //    var area = GetOccupitedArea(ship, x, y);
-        //    Debug.Log($"{FormatBounds(area)}, x={x}, y={y}, floors {ship.FloorsNum()} " + $"{ship.orientation}");
-        //    spawnAreas.Add(area);
+        foreach (Ship ship in allShips)
+        {
 
-        //    //AllocateShip(ship);
-        //}
-
-
-        //for (int i = 0; i < 10; i++)
-        //{
-        //    var area = spawnAreas[i];
-        //    CheckAndAdjustAreaAndOrient((Ship)allShips[i], ref area);
-        //    Debug.Log(FormatBounds(area));
-        //}
+            AllocateShip(ship);
+        }
     }
 
     bool AreAllShipsInitialized()
@@ -81,6 +62,7 @@ public class AutoAllocator : GameField
         var x = Random.Range((int)selectedArea.min.x, (int)selectedArea.max.x);
         var y = Random.Range((int)selectedArea.min.y, (int)selectedArea.max.y);
         ship.cellCenterPos = boundsOfCells[x, y].center;
+        ship.transform.position = ship.cellCenterPos;
         MarkupArea(ship, x,y);
 
     }
@@ -158,7 +140,33 @@ public class AutoAllocator : GameField
         return miniMaxX > maxMinX && miniMaxY >  maxMinY;
     }
 
-
+    void SplitArea(Bounds initial, Bounds occupied)
+    {
+        CreateSubarea(initial, initial.max.y, occupied.max.y, false);
+        CreateSubarea(initial, initial.max.x, occupied.max.x, true);
+        CreateSubarea(initial, occupied.min.y, initial.min.y, false);
+        CreateSubarea(initial, occupied.min.x, initial.min.x, true);
+    }
+    void CreateSubarea(Bounds area, float max, float min, bool isVertical)
+    {
+        if (max - min < 1)
+        {
+            return;
+        }
+        var subarea = new Bounds();
+        if (isVertical)
+        {
+            subarea.center = new Vector3((max + min) / 2, area.center.y);
+            subarea.size = new Vector3(max - min, area.size.y);
+        }
+        else
+        {
+            subarea.center = new Vector3(area.center.x, (max + min) / 2);
+            subarea.size = new Vector3(area.size.x, max - min);
+        }
+        spawnAreas.Add(subarea);
+        Debug.Log($"area created {FormatBounds(subarea)}");
+    }
 
     Bounds GetOccupitedArea(Ship ship, int x, int y)
     {
@@ -186,19 +194,19 @@ public class AutoAllocator : GameField
 
     void OnDrawGizmos()
     {
-        var colors = new Color[]
-        {
-            Color.black, Color.blue, Color.cyan, Color.gray, Color.green
-        };
-        int c = 0;
+        //var colors = new Color[]
+        //{
+        //    Color.black, Color.blue, Color.cyan, Color.gray, Color.green
+        //};
+        //int c = 0;
         
-        foreach (var area in spawnAreas)
-        {
-            if (c == colors.Length) c = 0;
-            Gizmos.color = colors[c];
-            Gizmos.DrawWireCube((Vector3)originBottomLeft + area.center - new Vector3(2.5f, 2.5f) * cellSize, 
-                area.size * cellSize);
-            c++;
-        }
+        //foreach (var area in spawnAreas)
+        //{
+        //    if (c == colors.Length) c = 0;
+        //    Gizmos.color = colors[c];
+        //    Gizmos.DrawWireCube((Vector3)originBottomLeft + area.center - new Vector3(2.5f, 2.5f) * cellSize, 
+        //        area.size * cellSize);
+        //    c++;
+        //}
     }
 }

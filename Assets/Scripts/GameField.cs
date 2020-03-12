@@ -114,15 +114,15 @@ public class GameField : MonoBehaviour
 
         if (!IsOverField)//Кораблик за пределами поля
         {
-            ship.IsPositionCorrect = false;
-            ship.IsWithIn = false;
+            ship.isPositionCorrect = false;
+            ship.isWithinCell = false;
             return;
         }
         int sx = (int)CellNormalPos.x;
         int sy = (int)CellNormalPos.y;
         //Debug.Log(x+" , "+y);
-        ship.IsPositionCorrect = IsLocationAppropriate(ship,sx,sy);
-        ship.IsWithIn = true;
+        ship.isPositionCorrect = IsLocationAppropriate(ship,sx,sy);
+        ship.isWithinCell = true;
         ship.cellCenterPos = boundsOfCells[sx,sy].center;
         //Debug.Log(y);
 
