@@ -19,12 +19,7 @@ public class AutoAllocator : GameField
         
 
 
-        //for (int i = 0; i < 20; i++)
-        //{
-        //    var area = new Bounds(new Vector3(Random.Range(0,8), Random.Range(0,8)),
-        //        new Vector3(Random.Range(1, 4), Random.Range(1, 4)));
-        //    spawnAreas.Add(area);
-        //}
+        
         StartCoroutine(AllocateAllShips());
     }
 
@@ -62,7 +57,7 @@ public class AutoAllocator : GameField
         var x = Random.Range((int)selectedArea.min.x, (int)selectedArea.max.x);
         var y = Random.Range((int)selectedArea.min.y, (int)selectedArea.max.y);
         ship.cellCenterPos = boundsOfCells[x, y].center;
-        ship.transform.position = ship.cellCenterPos;
+        ship.AutoAllign();
         MarkupArea(ship, x,y);
 
     }
@@ -119,12 +114,14 @@ public class AutoAllocator : GameField
 
     void MarkupArea(Ship ship, int x, int y)
     {
-        var occupitedArea = GetOccupitedArea(ship, x, y);
+        var occupiedArea = GetOccupitedArea(ship, x, y);
         var initialSpawnAreas = CopyList(spawnAreas);
 
-        foreach (var initialSpawnArea in initialSpawnAreas)
+        foreach (var initialArea in initialSpawnAreas)
         {
-
+            if (!BoundsOverlap(initialArea, occupiedArea)) continue;
+            spawnAreas.Remove(initialArea);
+            SplitArea(initialArea, occupiedArea);
         }
 
 
@@ -133,11 +130,11 @@ public class AutoAllocator : GameField
     bool BoundsOverlap(Bounds initial, Bounds occupied)
     {
         if (initial == selectedArea) return true;
-        var miniMaxX = Mathf.Min(initial.max.x, occupied.max.x);
+        var minMaxX = Mathf.Min(initial.max.x, occupied.max.x);
         var maxMinX = Mathf.Min(initial.min.x, occupied.min.x);
-        var miniMaxY = Mathf.Min(initial.max.y, occupied.max.y);
+        var minMaxY = Mathf.Min(initial.max.y, occupied.max.y);
         var maxMinY = Mathf.Min(initial.min.y, occupied.min.y);
-        return miniMaxX > maxMinX && miniMaxY >  maxMinY;
+        return minMaxX > maxMinX && minMaxY >  maxMinY;
     }
 
     void SplitArea(Bounds initial, Bounds occupied)
@@ -149,10 +146,7 @@ public class AutoAllocator : GameField
     }
     void CreateSubarea(Bounds area, float max, float min, bool isVertical)
     {
-        if (max - min < 1)
-        {
-            return;
-        }
+        if (max - min < 1) return;
         var subarea = new Bounds();
         if (isVertical)
         {
@@ -170,7 +164,7 @@ public class AutoAllocator : GameField
 
     Bounds GetOccupitedArea(Ship ship, int x, int y)
     {
-        float shipExtension = ship.FloorsNum() / 2;
+        float shipExtension = (float)ship.FloorsNum() / 2;
         float centerX = x + shipExtension, centerY = y + 0.5f;
         float areaWidth = ship.FloorsNum() + 2, areaHeigth = 3;
 
@@ -183,7 +177,8 @@ public class AutoAllocator : GameField
 
 
         }
-         var result = new Bounds(new Vector3(centerX, centerY), new Vector3(areaWidth, areaHeigth));
+         var result = new Bounds(new Vector3(centerX, centerY), 
+             new Vector3(areaWidth, areaHeigth));
         return result;
     }
 
