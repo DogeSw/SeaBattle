@@ -79,7 +79,7 @@ public class AutoAllocator : GameField
     {
         var canStandVertically = ship.FloorsNum() <= area.size.y;
         var canStandHorizontally = ship.FloorsNum() <= area.size.x;
-        float adjSize = ship.FloorsNum() - 1;
+        
         
         if (!canStandHorizontally && !canStandVertically) return false;
         else if (canStandHorizontally && canStandVertically)
@@ -87,6 +87,13 @@ public class AutoAllocator : GameField
         else if (canStandHorizontally) ship.orientation = Ship.Orientation.Horizontal;
         else ship.orientation = Ship.Orientation.Vertical;
 
+
+        AdjustSelectedArea(ship, ref area);
+        return true;
+    }
+    void AdjustSelectedArea(Ship ship, ref Bounds area)
+    {
+        float adjSize = ship.FloorsNum() - 1;
         Debug.Log($"initial area {FormatBounds(area)}");
 
         if (ship.orientation == Ship.Orientation.Horizontal)
@@ -100,11 +107,9 @@ public class AutoAllocator : GameField
             area.center = new Vector3(area.center.x, area.center.y + adjSize / 2);
         }
 
-        
+
         Debug.Log($"new area {FormatBounds(area)} for ship len {ship.FloorsNum()} " +
             $"for orientation {ship.orientation}");
-
-        return true;
     }
 
     List<T> CopyList<T>(List<T> list)
@@ -115,6 +120,7 @@ public class AutoAllocator : GameField
     void MarkupArea(Ship ship, int x, int y)
     {
         var occupiedArea = GetOccupitedArea(ship, x, y);
+        Debug.Log($"ship has taken {occupiedArea}");
         var initialSpawnAreas = CopyList(spawnAreas);
 
         foreach (var initialArea in initialSpawnAreas)

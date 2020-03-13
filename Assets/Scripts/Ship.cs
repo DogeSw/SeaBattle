@@ -157,5 +157,7 @@ public class Ship : Dispatcher
     public override string ToString()
     {
         var result = base.ToString();
+        Debug.Log($"{result}, {floorsNum}, floor : {orientation}");
+        return result;
     }
 }
